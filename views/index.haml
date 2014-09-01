@@ -2,72 +2,21 @@
 %html
   %head
     %title Cornwall Proyect
+
+    / Vendor's CSS
     %link{:href => 'http://fonts.googleapis.com/css?family=Lobster', :rel => 'stylesheet', :type => 'text/css'}
-    %link{:type => "text/css", :href => "/skins/jplayer.blue.monday.css", :rel => "stylesheet"}
+    %link{:type => "text/css", :href => "/js/vendor/jPlayer/skins/jplayer.blue.monday.css", :rel => "stylesheet"}
+
+    / Application's CSS
+    %link{:type => "text/css", :href => "/css/app.css", :rel => "stylesheet"}
+
+    / Vendor's JS
     %script{:type => "text/javascript", :src => "//code.jquery.com/jquery-1.11.0.min.js"}
-    %script{:type => "text/javascript", :src => "/js/jquery.jplayer.min.js"}
-    %script{:type => "text/javascript", :src => "/js/jplayer.playlist.min.js"}
+    %script{:type => "text/javascript", :src => "/js/vendor/jPlayer/jquery.jplayer.min.js"}
+    %script{:type => "text/javascript", :src => "/js/vendor/jPlayer/jplayer.playlist.min.js"}
 
-    :javascript
-        $(document).ready(function(){
-          var myPlaylist = new jPlayerPlaylist({
-            jPlayer: "#jquery_jplayer_1",
-            cssSelectorAncestor: "#jp_container_1"
-          }, 
-          [], 
-          {
-            swfPath: "/js",
-            supplied: "mp3",
-            wmode: "window",
-            smoothPlayBar: true,
-            keyEnabled: true
-          });
-          call_gettracksurl_service({});
-          $(myPlaylist.cssSelector.jPlayer).bind($.jPlayer.event.play, 
-          function(event) {
-            if(myPlaylist.current >= (myPlaylist.playlist.length - 2)){
-              var ids = [];
-              $.each(myPlaylist.playlist, function(index,track){
-                ids.push(track.id);
-              });
-              call_gettracksurl_service(ids);
-            }
-          });
-          function call_gettracksurl_service(ids){
-            $.ajax({
-              url : "/getTracksUrl",
-              type: "POST",
-              data : {used_ids : ids},
-              success: function(data, textStatus, jqXHR) {
-                data = JSON.parse(data);
-                $.each(data, function(index,track){
-                  myPlaylist.add(track);
-                });
-                myPlaylist.play();
-                },
-                error: function (jqXHR, textStatus, errorThrown) {}
-            });
-          }
-        });
-
-  :css
-    body {
-      background: url("img/background.jpg") center center fixed;
-      background-size: cover;
-      font-family: 'Lobster',sans-serif;
-    }
-    h1 {
-      font-size: 60px;
-      line-height: 50px;
-    }
-    #content{
-      text-align: center;
-      vertical-align: middle;
-    }
-    #jp_container_1 {
-      margin-left: auto;
-      margin-right: auto;
-    }
+    / Application's JS
+    %script{:type => "text/javascript", :src => "/js/app.js"}
 
   %body
     #content
