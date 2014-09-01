@@ -9,9 +9,11 @@ $(document).ready(function(){
     supplied: "mp3",
     wmode: "window",
     smoothPlayBar: true,
-    keyEnabled: true
+    keyEnabled: true,
   });
+
   call_gettracksurl_service({});
+
   $(myPlaylist.cssSelector.jPlayer).bind($.jPlayer.event.play, 
   function(event) {
     if(myPlaylist.current >= (myPlaylist.playlist.length - 2)){
@@ -22,6 +24,7 @@ $(document).ready(function(){
       call_gettracksurl_service(ids);
     }
   });
+
   function call_gettracksurl_service(ids){
     $.ajax({
       url : "/getTracksUrl",
@@ -32,7 +35,6 @@ $(document).ready(function(){
         $.each(data, function(index,track){
           myPlaylist.add(track);
         });
-        myPlaylist.play();
         },
         error: function (jqXHR, textStatus, errorThrown) {}
     });
