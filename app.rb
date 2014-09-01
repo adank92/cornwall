@@ -9,38 +9,27 @@ get '/' do
 	haml :index
 end
 
-post '/getTracksUrl' do
+get '/tracks' do
+	offset = 0
+	stream_urls = []
 	used_ids = params[:used_ids] || []
-	begin
-		offset = offset ? offset + 10 : 0
-		tracks = get_tracks(offset)
-		stream_urls ||= []
-		stream_urls  = 	tracks.inject(stream_urls) do |acc, track|
-						   acc << {:title => track.title, :mp3 => track.stream_url, :id => track.id} if track.streamable && !used_ids.include?(track.id.to_s)
-						   acc
-						end
-	end while stream_urls.count < 5
+	client = Soundcloud.new(:client_id => CLIENT_ID)
 
-	stream_urls.collect! do |track|
+	while stream_urls.count < 5		
+		tracks = client.get('/tracks', :limit => 10, :offset => offset, :genres => 'jazz', 
+			:licence => 'cc-by-sa', :"duration[from]" => 150000, :"duration[to]" => 480000)
+		tracks.each do |track|
+			if track.streamable and not used_ids.include?(track.id.to_s)
+				stream_urls << {:title => track.title, :mp3 => track.stream_url, :id => track.id}
+			end
+		end
+		offset += 10
+	end 
+
+	stream_urls.map! do |track|
 		track[:mp3] += "?client_id=#{CLIENT_ID}"
 		track
 	end
 
 	stream_urls.slice!(0,5).to_json
-end
-
-def get_tracks(offset)
-	client = Soundcloud.new(:client_id => CLIENT_ID)
-
-	tracks = client.get('/tracks', :limit => 10, :offset => offset, :genres => 'jazz', :licence => 'cc-by-sa', :"duration[from]" => 150000, :"duration[to]" => 480000)
-end
-
-def get_embed 
-	get_tracks
-	track_url = tracks.sample.permalink_url
-
-	embed_info = client.get('/oembed', :url => track_url)
-
-	# print the html for the player widget
-	embed_info['html']
 end

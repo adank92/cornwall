@@ -12,7 +12,7 @@ $(document).ready(function(){
     keyEnabled: true,
   });
 
-  call_gettracksurl_service({});
+  get_tracks({});
 
   $(myPlaylist.cssSelector.jPlayer).bind($.jPlayer.event.play, 
   function(event) {
@@ -21,14 +21,14 @@ $(document).ready(function(){
       $.each(myPlaylist.playlist, function(index,track){
         ids.push(track.id);
       });
-      call_gettracksurl_service(ids);
+      get_tracks(ids);
     }
   });
 
-  function call_gettracksurl_service(ids){
+  function get_tracks(ids){
     $.ajax({
-      url : "/getTracksUrl",
-      type: "POST",
+      url : "/tracks",
+      type: "GET",
       data : {used_ids : ids},
       success: function(data, textStatus, jqXHR) {
         data = JSON.parse(data);
