@@ -1,11 +1,13 @@
 !!!
 %html
   %head
-    %title My Sinatra Website
+    %title Cornwall Proyect
+    %link{:href => 'http://fonts.googleapis.com/css?family=Lobster', :rel => 'stylesheet', :type => 'text/css'}
     %link{:type => "text/css", :href => "/skins/jplayer.blue.monday.css", :rel => "stylesheet"}
     %script{:type => "text/javascript", :src => "//code.jquery.com/jquery-1.11.0.min.js"}
     %script{:type => "text/javascript", :src => "/js/jquery.jplayer.min.js"}
     %script{:type => "text/javascript", :src => "/js/jplayer.playlist.min.js"}
+
     :javascript
         $(document).ready(function(){
           var myPlaylist = new jPlayerPlaylist({
@@ -20,69 +22,99 @@
             smoothPlayBar: true,
             keyEnabled: true
           });
-          $.ajax({
+          call_gettracksurl_service({});
+          $(myPlaylist.cssSelector.jPlayer).bind($.jPlayer.event.play, 
+          function(event) {
+            if(myPlaylist.current >= (myPlaylist.playlist.length - 2)){
+              var ids = [];
+              $.each(myPlaylist.playlist, function(index,track){
+                ids.push(track.id);
+              });
+              call_gettracksurl_service(ids);
+            }
+          });
+          function call_gettracksurl_service(ids){
+            $.ajax({
               url : "/getTracksUrl",
               type: "POST",
-              data : {},
-              success: function(data, textStatus, jqXHR)
-              {
-                  myPlaylist.setPlaylist(JSON.parse(data));
-                  myPlaylist.play();
-              },
-              error: function (jqXHR, textStatus, errorThrown)
-              {}
-          });
-          $("#jquery_jplayer_1").bind($.jPlayer.event.ended, 
-          function(event) { 
-              console.log('>>>ended ');
-          }); 
-
+              data : {used_ids : ids},
+              success: function(data, textStatus, jqXHR) {
+                data = JSON.parse(data);
+                $.each(data, function(index,track){
+                  myPlaylist.add(track);
+                });
+                myPlaylist.play();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {}
+            });
+          }
         });
 
+  :css
+    body {
+      background: url("img/background.jpg") center center fixed;
+      background-size: cover;
+      font-family: 'Lobster',sans-serif;
+    }
+    h1 {
+      font-size: 60px;
+      line-height: 50px;
+    }
+    #content{
+      text-align: center;
+      vertical-align: middle;
+    }
+    #jp_container_1 {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
   %body
-    #jquery_jplayer_1.jp-jplayer
-    #jp_container_1.jp-audio
-      .jp-type-playlist
-        .jp-gui.jp-interface
-          %ul.jp-controls
-            %li
-              %a.jp-previous{:href => "javascript:;", :tabindex => "1"} previous
-            %li
-              %a.jp-play{:href => "javascript:;", :tabindex => "1"} play
-            %li
-              %a.jp-pause{:href => "javascript:;", :tabindex => "1"} pause
-            %li
-              %a.jp-next{:href => "javascript:;", :tabindex => "1"} next
-            %li
-              %a.jp-stop{:href => "javascript:;", :tabindex => "1"} stop
-            %li
-              %a.jp-mute{:href => "javascript:;", :tabindex => "1", :title => "mute"} mute
-            %li
-              %a.jp-unmute{:href => "javascript:;", :tabindex => "1", :title => "unmute"} unmute
-            %li
-              %a.jp-volume-max{:href => "javascript:;", :tabindex => "1", :title => "max volume"} max volume
-          .jp-progress
-            .jp-seek-bar
-              .jp-play-bar
-          .jp-volume-bar
-            .jp-volume-bar-value
-          .jp-time-holder
-            .jp-current-time
-            .jp-duration
-          %ul.jp-toggles
-            %li
-              %a.jp-shuffle{:href => "javascript:;", :tabindex => "1", :title => "shuffle"} shuffle
-            %li
-              %a.jp-shuffle-off{:href => "javascript:;", :tabindex => "1", :title => "shuffle off"} shuffle off
-            %li
-              %a.jp-repeat{:href => "javascript:;", :tabindex => "1", :title => "repeat"} repeat
-            %li
-              %a.jp-repeat-off{:href => "javascript:;", :tabindex => "1", :title => "repeat off"} repeat off
-        .jp-playlist
-          %ul
-            %li
-        .jp-no-solution
-          %span Update Required
-          To play the media you will need to either update your browser to a recent version or update your
-          = succeed "." do
-            %a{:href => "http://get.adobe.com/flashplayer/", :target => "_blank"} Flash plugin
+    #content
+      %h1 Cornwall
+      #jquery_jplayer_1.jp-jplayer
+      #jp_container_1.jp-audio
+        .jp-type-playlist
+          .jp-gui.jp-interface
+            %ul.jp-controls
+              %li
+                %a.jp-previous{:href => "javascript:;", :tabindex => "1"} previous
+              %li
+                %a.jp-play{:href => "javascript:;", :tabindex => "1"} play
+              %li
+                %a.jp-pause{:href => "javascript:;", :tabindex => "1"} pause
+              %li
+                %a.jp-next{:href => "javascript:;", :tabindex => "1"} next
+              %li
+                %a.jp-stop{:href => "javascript:;", :tabindex => "1"} stop
+              %li
+                %a.jp-mute{:href => "javascript:;", :tabindex => "1", :title => "mute"} mute
+              %li
+                %a.jp-unmute{:href => "javascript:;", :tabindex => "1", :title => "unmute"} unmute
+              %li
+                %a.jp-volume-max{:href => "javascript:;", :tabindex => "1", :title => "max volume"} max volume
+            .jp-progress
+              .jp-seek-bar
+                .jp-play-bar
+            .jp-volume-bar
+              .jp-volume-bar-value
+            .jp-time-holder
+              .jp-current-time
+              .jp-duration
+            %ul.jp-toggles
+              %li
+                %a.jp-shuffle{:href => "javascript:;", :tabindex => "1", :title => "shuffle"} shuffle
+              %li
+                %a.jp-shuffle-off{:href => "javascript:;", :tabindex => "1", :title => "shuffle off"} shuffle off
+              %li
+                %a.jp-repeat{:href => "javascript:;", :tabindex => "1", :title => "repeat"} repeat
+              %li
+                %a.jp-repeat-off{:href => "javascript:;", :tabindex => "1", :title => "repeat off"} repeat off
+          .jp-playlist
+            %ul
+              %li
+          .jp-no-solution
+            %span Update Required
+            To play the media you will need to either update your browser to a recent version or update your
+            = succeed "." do
+              %a{:href => "http://get.adobe.com/flashplayer/", :target => "_blank"} Flash plugin
