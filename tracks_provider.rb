@@ -1,5 +1,6 @@
 require 'soundcloud'
 require 'json'
+require 'open-uri'
 
 class TracksProvider
 	CLIENT_ID = 'a2340d5b7b5f7e58128486190268ce71'
@@ -37,10 +38,17 @@ class TracksProvider
 		limit = 200
 		client = get_api_connector
 		stream_urls = []
+		params = {
+			:limit => limit, 
+			:genres => genre, 
+			:licence => 'cc-by-sa',
+			:"duration[from]" => 150000,
+			:"duration[to]" => 480000
+		}
 
 		while stream_urls.count < amount
-			tracks = client.get('/tracks', :limit => limit, :offset => offset, :genres => genre, :licence => 'cc-by-sa', 
-			:"duration[from]" => 150000, :"duration[to]" => 480000)
+			params[:offset] = offset
+			tracks = client.get('/tracks', params)
 			tracks.each do |track|
 				if track.streamable
 					stream_urls << {:title => track.title, :mp3 => track.stream_url, :id => track.id}
@@ -56,15 +64,16 @@ class TracksProvider
 		offset = 0
 		limit = 50
 		tracks_total = []
-	  pages.times do
-	  	url = "https://api-v2.soundcloud.com/explore/#{genre}?tag=uniform-time-decay-experiment%3A1%3A1389973574&limit=#{limit}&offset=#{offset}&linked_partitioning=1"
-	  	begin
-	  		tracks = JSON.parse(open(url).read)
-	  	rescue Exception
-	    tracks_total += tracks['tracks']
-	    offset += limit
-	  end
-	  tracks_total
+		pages.times do
+			url = "https://api-v2.soundcloud.com/explore/#{genre}?tag=uniform-time-decay-experiment%3A1%3A1389973574&limit=#{limit}&offset=#{offset}&linked_partitioning=1"
+			begin
+				tracks = JSON.parse(open(url).read)
+			rescue Exception
+			end
+			tracks_total += tracks['tracks']
+			offset += limit
+		end
+		tracks_total
 	end
 
 end
