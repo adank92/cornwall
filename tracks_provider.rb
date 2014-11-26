@@ -1,31 +1,45 @@
 require 'soundcloud'
 require 'json'
 require 'open-uri'
+require 'dalli'
 
 class TracksProvider
 	CLIENT_ID = 'a2340d5b7b5f7e58128486190268ce71'
 	PAGE_SIZE = 200
 	PAGE_COUNT = 2
 	LICENSE = 'cc-by-sa'
-	GENRES = ['jazz']
+	GENRES = ['Jazz']
+
+	def initialize
+		@dc = Dalli::Client.new('localhost:11211')
+	end
 
 	def update
 		client = get_api_connector
 		tracks = []
 
 		GENRES.each do |genre|
-			tracks.concat(fetch_tracks_api(genre,client))
-			tracks.concat(fetch_tracks_web(genre))
+			genre_tracks = fetch_tracks_api(genre,client) + fetch_tracks_web(genre)
+			genre_tracks.map do |track|
+				track['genre'] = genre
+				track
+			end
+			tracks.concat genre_tracks
 		end
 
 		tracks.uniq! { |t| t['uri'].split('/').last }
 		tracks.map! { |track| track_summary(track) }
 		tracks.sort_by! { |t| -t[:freshness] }
 
+		GENRES.each do |genre|
+			genre_tracks = tracks.select { |track| track[:genre] == genre }
+			@dc.set(genre, genre_tracks)
+		end
+
 		tracks
 	end
 
-	def fetch_tracks_api genre, client
+	def fetch_tracks_api genre, client=nil
 		client ||= get_api_connector
 		stream_urls = []
 		params = {
@@ -44,6 +58,7 @@ class TracksProvider
 				stream_urls << track if track.streamable
 			end
 		end
+		
 		puts "Returning total: #{stream_urls.count}"
 		stream_urls
 	end
@@ -60,6 +75,7 @@ class TracksProvider
 			end
 			tracks_total.concat(tracks['tracks'])
 		end
+
 		puts "Returning total: #{tracks_total.count}"
 		tracks_total
 	end
@@ -69,6 +85,7 @@ class TracksProvider
 			:title => track['title'],
 			:mp3 => track['stream_url'] + "?client_id=#{CLIENT_ID}",
 			:id => track['id'],
+			:genre => track['genre'],
 			:freshness => freshness(track)
 		}
 	end
