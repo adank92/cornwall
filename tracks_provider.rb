@@ -8,10 +8,10 @@ class TracksProvider
 	PAGE_SIZE = 200
 	PAGE_COUNT = 2
 	LICENSE = 'cc-by-sa'
-	GENRES = ['Jazz']
+	GENRES = ['jazz']
 
 	def initialize
-		@dc = Dalli::Client.new('localhost:11211')
+		@dc = Dalli::Client.new
 	end
 
 	def update
