@@ -2,6 +2,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     coderay (1.1.0)
+    dalli (2.7.2)
     haml (4.0.5)
       tilt
     hashie (2.1.2)
@@ -38,6 +39,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  dalli
   haml
   json
   pry

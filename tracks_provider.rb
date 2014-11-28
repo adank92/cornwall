@@ -86,6 +86,8 @@ class TracksProvider
 			:mp3 => track['stream_url'] + "?client_id=#{CLIENT_ID}",
 			:id => track['id'],
 			:genre => track['genre'],
+			:permalink => track['permalink_url'],
+			:artwork => img_track(track),
 			:freshness => freshness(track)
 		}
 	end
@@ -96,6 +98,19 @@ class TracksProvider
 		plays = track['playback_count'].to_i
 		plays = 1 if plays < 1
 		freshness = plays / days.to_f ** 1.2
+	end
+
+	def img_track track
+		img = track['artwork_url'].to_s
+		if img.empty?
+			img = "public/img/" + track['genre'] + ".jpg"
+			if File.exists?(img)
+				img.slice! "public/"
+			elsif 
+				img = ''
+			end
+		end
+		img
 	end
 
 	def get_api_connector
