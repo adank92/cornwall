@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    chronic (0.10.2)
     coderay (1.1.0)
     dalli (2.7.2)
     haml (4.0.5)
@@ -34,6 +35,8 @@ GEM
       hashie (~> 2.0)
       httmultiparty (~> 0.3.0)
     tilt (1.4.1)
+    whenever (0.9.4)
+      chronic (>= 0.6.3)
 
 PLATFORMS
   ruby
@@ -45,3 +48,4 @@ DEPENDENCIES
   pry
   sinatra
   soundcloud
+  whenever
