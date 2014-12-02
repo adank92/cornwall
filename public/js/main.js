@@ -1,5 +1,11 @@
+var as;
+var audio;
+
 $(function() {
 	// Dom ready call
+  as = audiojs.createAll();
+  audio = as[0];
+
 	setBindings();
   fetchTracks();
 });
@@ -9,26 +15,40 @@ function fetchTracks() {
 	var limit = calculateTotalTracks();
 	$.get( "/tracks/jazz/0/"+limit, function( data ) {
   	$.each(data, function(key, track){
-  		$('<div/>', {
+      var background_div = $('<div/>', {
+          class: 'super',
+          style: 'background-image: url('+track.artwork+');'
+      });
+  		$('<a/>', {
 			    class: 'super',
-			    href: track.permalink,
-			    style: 'background-image: url('+track.artwork+');'
+			    href: '#',
+			    'data-src': track.mp3,
+          html: background_div
 			}).appendTo('#tracks-container');
-			$('.super').wrap("<a href='#'></a>");
   	});
+    playFirstTrack();
 	}, "json" );
 }
 
 function setBindings(){
 	// Sets bindings for tracks
-	$( document ).on( "click", ".super", function(){
-  	ToneDen.player.getInstanceByDom("#player").update({
-  		urls: [
-            $(this).attr('href')
-        ]
-  	});
-  	ToneDen.player.getInstanceByDom("#player").play();
-  });
+  $( document ).on( "click", "#tracks-container a", function (e){
+    e.preventDefault();
+    playTrack($(this));
+  })
+}
+
+function playTrack(track){
+  $("#tracks-container a").removeClass('playing_track');
+  var track_url = track.attr('data-src');
+  audio.load(track_url)
+  audio.play();
+  track.addClass('playing_track');
+}
+
+function playFirstTrack(){
+  var first_track = $("#tracks-container a").first();
+  playTrack(first_track);
 }
 
 function calculateTotalTracks(){
@@ -38,28 +58,3 @@ function calculateTotalTracks(){
 	var tracks_width = Math.floor(($('body').innerWidth() - 20) / 160);
 	return (tracks_height * tracks_width) - 1;
 }
-
-// ToneDen Player Code
-(function() {
-
-    var script = document.createElement("script");
-
-    script.type = "text/javascript";
-    script.async = true;
-    script.src = "//sd.toneden.io/production/toneden.loader.js"
-
-    var entry = document.getElementsByTagName("script")[0];
-    entry.parentNode.insertBefore(script, entry);
-}());
-
-ToneDenReady = window.ToneDenReady || [];
-ToneDenReady.push(function() {
-    ToneDen.player.create({
-        dom: "#player",
-        mini: true,
-        feed: true,
-        urls: [
-            "http://soundcloud.com/diplo/avicii-you-make-me-diplo-ookay"
-        ]
-    });
-});
