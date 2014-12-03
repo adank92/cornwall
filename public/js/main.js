@@ -21,11 +21,6 @@ $(function() {
               <div class="time"> \
                 <em class="played">00:00</em>/<strong class="duration">00:00</strong> \
               </div> \
-              <div class="track-info"> \
-                <div class="title"></div> \
-                <div class="artist"></div> \
-              </div> \
-              <a href="#" class="soundcloud-link" target="new"><div class="soundcloud-img"></div></a>\
               <div class="error-message"></div>',
             playPauseClass: 'play-pause',
             scrubberClass: 'scrubber',
@@ -61,7 +56,6 @@ function fetchTracks() {
           html: background_div
 			}).appendTo('#tracks-container');
   	});
-    playFirstTrack();
 	}, "json" );
 }
 
@@ -76,9 +70,9 @@ function setBindings(){
 function playTrack(track_case){
   $("#tracks-container a").removeClass('playing_track');
   var track = tracks[track_case.attr('track-id')];
-  $('.audiojs .title').html(track.title);
-  $('.audiojs .artist').html(track.artist);
-  $('.audiojs .soundcloud-link').attr('href', track.permalink);
+  $('.track-info .title').html(track.title);
+  $('.track-info .artist').html(track.artist);
+  $('.soundcloud-link').attr('href', track.permalink);
   audio.load(track.mp3);
   audio.play();
   track_case.addClass('playing_track');
