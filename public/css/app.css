@@ -34,6 +34,12 @@ repeating-linear-gradient(135deg, transparent 5px, hsla(197, 62%, 11%, 0.5) 5px,
   position: relative;
 }
 
+.playing_track {
+  z-index: 1;
+  webkit-box-shadow: 0 0 20px 3px #F7FF03;
+  box-shadow: 0 0 20px 3px #F7FF03;
+}
+
 .audiojs{
   width: 100%;
   max-width: 100%;
@@ -43,11 +49,38 @@ repeating-linear-gradient(135deg, transparent 5px, hsla(197, 62%, 11%, 0.5) 5px,
 }
 
 .audiojs .play-pause{
+  border-right: 1px solid #5E5E5E;
   padding: 4px 0px;
+  width: 28px;
 }
 
-.playing_track {
-  z-index: 1;
-  webkit-box-shadow: 0 0 20px 3px #F7FF03;
-  box-shadow: 0 0 20px 3px #F7FF03;
+.audiojs .time{
+  border-left: 1px solid #5E5E5E;
+  padding: 0px 12px;
 }
+
+.audiojs .track-info {
+  float: left;
+  color: white;
+  border-left: 1px solid #5E5E5E;
+  border-right: 1px solid #5E5E5E;
+  height: 36px;
+  text-align: center;
+  padding: 3px 10px;
+}
+
+.audiojs .artist{
+  font-weight: bolder;
+}
+
+.audiojs .soundcloud-img{
+  background: url(/img/soundcloud.png);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 50px;
+  height: 25px;
+  margin: 3px 12px;
+  float: left;
+}
+

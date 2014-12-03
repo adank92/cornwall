@@ -82,6 +82,7 @@ class TracksProvider
 
 	def track_summary track
 		{
+			:artist => track['user']['username'],
 			:title => track['title'],
 			:mp3 => track['stream_url'] + "?client_id=#{CLIENT_ID}",
 			:id => track['id'],
@@ -106,7 +107,7 @@ class TracksProvider
 			img = "public/img/" + track['genre'] + ".jpg"
 			if File.exists?(img)
 				img.slice! "public/"
-			elsif 
+			else
 				img = ''
 			end
 		end
