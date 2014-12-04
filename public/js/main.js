@@ -1,49 +1,32 @@
 var as;
 var audio;
-var tracks;
+var genres;
+var tracks = [];
 
 $(function() {
 	// Dom ready call
-  as = $('audio');
-  audio = audiojs.create(as, {
-          createPlayer: {
-            markup: '\
-              <div class="play-pause"> \
-                <p class="play"></p> \
-                <p class="pause"></p> \
-                <p class="loading"></p> \
-                <p class="error"></p> \
-              </div> \
-              <div class="scrubber"> \
-                <div class="progress"></div> \
-                <div class="loaded"></div> \
-              </div> \
-              <div class="time"> \
-                <em class="played">00:00</em>/<strong class="duration">00:00</strong> \
-              </div> \
-              <div class="error-message"></div>',
-            playPauseClass: 'play-pause',
-            scrubberClass: 'scrubber',
-            progressClass: 'progress',
-            loaderClass: 'loaded',
-            timeClass: 'time',
-            durationClass: 'duration',
-            playedClass: 'played',
-            errorMessageClass: 'error-message',
-            playingClass: 'playing',
-            loadingClass: 'loading',
-            errorClass: 'error'
-          }})[0];
-
+  setAudio();
 	setBindings();
-  fetchTracks();
+  fetchGenres();
 });
 
-function fetchTracks() {
+function fetchGenres(){
+  $.get( "/genres", function( data ) {
+    genres = data;
+    $.each(data, function(key, genre){
+      $('.dropdown-menu').append('<li><a href="#">'+genre+'</a></li>');
+    });
+    default_genre = $('.dropdown-menu li a').first().text();
+    toggleDropdownText(default_genre);
+    fetchTracks(default_genre, 0);
+  }, "json" );
+}
+
+function fetchTracks(genre, offset) {
 	// Fetches tracks from the backend
 	var limit = calculateTotalTracks();
-	$.get( "/tracks/jazz/0/"+limit, function( data ) {
-    tracks = data;
+	$.get( "/tracks/"+genre+"/"+offset+"/"+limit, function( data ) {
+    tracks = tracks.concat(data);
   	$.each(data, function(key, track){
       var background_div = $('<div/>', {
           class: 'super',
@@ -65,6 +48,13 @@ function setBindings(){
     e.preventDefault();
     playTrack($(this));
   })
+  $( document ).on( "click", ".dropdown-menu li a", function(e){
+    e.preventDefault();
+    toggleDropdownText($(this).text());
+    clearTracks();
+    fetchTracks($(this).text(), 0);
+  });
+
 }
 
 function playTrack(track_case){
@@ -89,4 +79,18 @@ function calculateTotalTracks(){
 	var tracks_height = Math.ceil(($(document).height() - 60) / 160);
 	var tracks_width = Math.floor(($('body').innerWidth() - 20) / 160);
 	return (tracks_height * tracks_width) - 1;
+}
+
+function clearTracks(){
+  tracks = [];
+  $('#tracks-container').html('');
+}
+
+function toggleDropdownText(text){
+  $(".dropdown-toggle:first-child").html(text+' <span class="caret"></span>');
+}
+
+function setAudio(){
+  as = $('audio');
+  audio = audiojs.create(as)[0];
 }

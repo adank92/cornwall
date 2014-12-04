@@ -2,23 +2,24 @@ require 'soundcloud'
 require 'json'
 require 'open-uri'
 require 'dalli'
+require 'yaml'
 
 class TracksProvider
 	CLIENT_ID = 'a2340d5b7b5f7e58128486190268ce71'
 	PAGE_SIZE = 200
 	PAGE_COUNT = 2
 	LICENSE = 'cc-by-sa'
-	GENRES = ['jazz']
 
 	def initialize
 		@dc = Dalli::Client.new
+		@genres = YAML.load_file('config/genres.yaml')
 	end
 
 	def update
 		client = get_api_connector
 		tracks = []
 
-		GENRES.each do |genre|
+		@genres.each do |genre|
 			genre_tracks = fetch_tracks_api(genre,client) + fetch_tracks_web(genre)
 			genre_tracks.map do |track|
 				track['genre'] = genre
@@ -31,8 +32,9 @@ class TracksProvider
 		tracks.map! { |track| track_summary(track) }
 		tracks.sort_by! { |t| -t[:freshness] }
 
-		GENRES.each do |genre|
+		@genres.each do |genre|
 			genre_tracks = tracks.select { |track| track[:genre] == genre }
+			genre.downcase!
 			@dc.set(genre, genre_tracks)
 		end
 
