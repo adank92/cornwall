@@ -84,7 +84,10 @@ function calculateTotalTracks(){
 	// Taking into account player's size and scrollbar's as well.
 	var tracks_height = Math.ceil(($(document).height() - 60) / 160);
 	var tracks_width = Math.floor(($('body').innerWidth() - 20) / 160);
-	return (tracks_height * tracks_width) - 2;
+
+  // If load-more button exists then fetch more tracks
+  var substract = 2 - $(".load-more").length;
+	return (tracks_height * tracks_width) - substract;
 }
 
 function clearTracks(){
