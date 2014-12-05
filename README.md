@@ -1,5 +1,5 @@
 ## Cornwall
 
-Fetches random tracks from SoundCloud for an specific genre.
+Fetches tracks from SoundCloud for an specific genre.
 
-http://cornwall-adank.rhcloud.com/
+http://104.236.33.168:8080/
