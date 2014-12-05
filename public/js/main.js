@@ -118,6 +118,7 @@ function calculateTotalTracks(){
 function clearTracks(){
   // Clear tracks from the app
   tracks = [];
+  total_tracks = 0;
   $('#tracks-container').html('');
 }
 
