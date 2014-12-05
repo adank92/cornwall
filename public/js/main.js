@@ -109,11 +109,9 @@ function calculateTotalTracks(){
     total_tracks = (tracks_height * tracks_width) - substract;
 
     // First load implies one track less due to the load-more button
-    alert(total_tracks);
     return total_tracks -1;
   }
 
-  alert(total_tracks);
   return total_tracks;
 }
 
