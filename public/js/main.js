@@ -39,6 +39,16 @@ function setBindings(){
     offset = Object.keys(tracks).length;
     fetchTracks(current_genre, offset);
   });
+
+  $( document ).bind("ajaxSend", function() {
+      $( ".spinner-overlay" ).fadeIn( "slow", function() {});
+  }).bind("ajaxComplete", function() {
+      $( ".spinner-overlay" ).fadeOut( "slow", function() {});
+  }).bind("ajaxStop", function() {
+      $( ".spinner-overlay" ).fadeOut( "fast", function() {});
+  }).bind("ajaxError", function() {
+      $( ".spinner-overlay" ).fadeOut( "fast", function() {});
+  });
 }
 
 function fetchTracks(genre, offset) {

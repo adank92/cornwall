@@ -25,6 +25,7 @@ end
 def tracks_fetch genre, offset, limit
 	# Memcached communication
 	dc = Dalli::Client.new
-	tracks = dc.get(genre)[offset..limit] || []
+	tracks = dc.get(genre) || []
+	tracks = tracks[offset..limit]
 	Hash[tracks.map{|track| [track[:id], track]}]
 end
