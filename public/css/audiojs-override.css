@@ -1,0 +1,24 @@
+/* AudioJS override */
+
+.audiojs{
+  margin: 8px 0px 0px;
+  background: none;
+  background-image: none;
+  box-shadow: none;
+  width: auto;
+}
+
+.audiojs .play-pause{
+  border-right: 1px solid #5E5E5E;
+  padding: 4px 0px;
+  width: 28px;
+}
+
+.audiojs .time{
+  border-left: 1px solid #5E5E5E;
+  padding: 0px 12px;
+}
+
+.audiojs .scrubber{
+  width: 122px;
+}

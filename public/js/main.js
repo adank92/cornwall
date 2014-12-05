@@ -24,6 +24,12 @@ function fetchGenres(){
 }
 
 function setBindings(){
+  $( document )
+  .bind("ajaxSend", showSpinner)
+  .bind("ajaxComplete", onAjaxComplete)
+  .bind("ajaxStop", hideSpinner)
+  .bind("ajaxError", hideSpinner);
+
 	// Sets bindings for tracks
   $( document ).on( "click", "#tracks-container a", function (e){
     e.preventDefault();
@@ -39,16 +45,6 @@ function setBindings(){
     offset = Object.keys(tracks).length;
     fetchTracks(current_genre, offset);
   });
-
-  $( document ).bind("ajaxSend", function() {
-      $( ".spinner-overlay" ).fadeIn( "slow", function() {});
-  }).bind("ajaxComplete", function() {
-      $( ".spinner-overlay" ).fadeOut( "slow", function() {});
-  }).bind("ajaxStop", function() {
-      $( ".spinner-overlay" ).fadeOut( "fast", function() {});
-  }).bind("ajaxError", function() {
-      $( ".spinner-overlay" ).fadeOut( "fast", function() {});
-  });
 }
 
 function fetchTracks(genre, offset) {
@@ -57,15 +53,18 @@ function fetchTracks(genre, offset) {
   $.get( "/tracks/"+genre+"/"+offset+"/"+limit, function( data ) {
     tracks = $.extend({},tracks,data);
     $.each(data, function(key, track){
-      var background_div = $('<div/>', {
+      var background_img = $('<img/>', {
           class: 'super',
-          style: 'background-image: url('+track.artwork+');'
+          src: track.artwork
       });
-      $('<a/>', {
-          class: 'super',
+      var link = $('<a/>', {
           href: '#',
           'track-id': key,
-          html: background_div
+          html: background_img
+      });
+      $('<li/>', {
+        class: 'is-loading',
+        html: link
       }).appendTo('#tracks-container');
     });
 
@@ -74,14 +73,14 @@ function fetchTracks(genre, offset) {
 }
 
 function playTrack(track_case){
-  $("#tracks-container a").removeClass('playing_track');
+  $("#tracks-container img").removeClass('playing_track');
   var track = tracks[track_case.attr('track-id')];
   $('.track-info .title').html(track.title);
   $('.track-info .artist').html(track.artist);
   $('.soundcloud-link').attr('href', track.permalink);
   audio.load(track.mp3);
   audio.play();
-  track_case.addClass('playing_track');
+  track_case.children().addClass('playing_track');
 }
 
 function playFirstTrack(){
@@ -121,4 +120,27 @@ function addLoadMore(){
     class: 'load-more',
     html: "<button type='button' class='btn btn-default btn-lg'><span class='glyphicon glyphicon-refresh' aria-hidden='true'></span> Load More</button>"
   }).appendTo('#tracks-container');
+}
+
+function onProgress( imgLoad, image ) {
+  // triggered after each item is loaded
+  // change class if the image is loaded or broken
+  var $item = $( image.img ).closest('li');
+  $item.removeClass('is-loading');
+  if ( !image.isLoaded ) {
+    $item.addClass('is-broken');
+  }
+}
+
+function onAjaxComplete(){
+  hideSpinner();
+  $('#tracks-container').imagesLoaded().progress( onProgress );
+}
+
+function showSpinner(){
+  $( ".spinner-overlay" ).fadeIn( "slow", function() {});
+}
+
+function hideSpinner(){
+  $( ".spinner-overlay" ).fadeOut( "slow", function() {});
 }

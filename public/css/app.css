@@ -1,3 +1,7 @@
+@import url('audiojs-override.css');
+@import url('bootstrap-override.css');
+@import url('spinner.css');
+
 body {
  background: -webkit-linear-gradient(135deg, rgba(0,0,0,0) 25%, rgba(255,255,255,0.2) 25%, rgba(255,255,255,0.2) 50%, rgba(0,0,0,0) 50%, rgba(0,0,0,0) 75%, rgba(255,255,255,0.2) 75%), -webkit-linear-gradient(45deg, rgba(0,0,0,0) 25%, rgba(255,255,255,0.2) 25%, rgba(255,255,255,0.2) 50%, rgba(0,0,0,0) 50%, rgba(0,0,0,0) 75%, rgba(255,255,255,0.2) 75%), rgb(0, 153, 151);
   background: -moz-linear-gradient(-45deg, rgba(0,0,0,0) 25%, rgba(255,255,255,0.2) 25%, rgba(255,255,255,0.2) 50%, rgba(0,0,0,0) 50%, rgba(0,0,0,0) 75%, rgba(255,255,255,0.2) 75%), -moz-linear-gradient(45deg, rgba(0,0,0,0) 25%, rgba(255,255,255,0.2) 25%, rgba(255,255,255,0.2) 50%, rgba(0,0,0,0) 50%, rgba(0,0,0,0) 75%, rgba(255,255,255,0.2) 75%), rgb(0, 153, 151);
@@ -18,20 +22,52 @@ body {
   position: relative;
 }
 
-.super {
-  float:left;
-  width:160px;
-  height:160px;
-  background-size:   cover;
-  background-repeat: no-repeat;
+#tracks-container li {
+  height: 160px;
+  width: 160px;
+  display: block;
+  float: left;
+  list-style: none;
+  margin: 0;
+  background-color: black;
   background-position: center center;
-  position: relative;
+  background-repeat: no-repeat;
+}
+
+#tracks-container li a img{
+  width: 160px;
+  height: 160px;
+}
+
+#tracks-container li a img,
+#status {
+  -webkit-transition: opacity 0.4s;
+     -moz-transition: opacity 0.4s;
+      -ms-transition: opacity 0.4s;
+          transition: opacity 0.4s;
+}
+
+#tracks-container li.is-loading {
+  background-color: black;
+  background-image: url('http://desandro.github.io/imagesloaded/assets/loading.gif');
+}
+
+#tracks-container li.is-broken {
+  background-image: url('http://desandro.github.io/imagesloaded/assets/broken.png');
+  background-color: #be3730;
+  width: 160px;
+}
+
+#tracks-container li.is-loading img,
+#tracks-container li.is-broken img {
+  opacity: 0;
 }
 
 .playing_track {
   z-index: 1;
   webkit-box-shadow: 0 0 20px 3px #F7FF03;
   box-shadow: 0 0 20px 3px #F7FF03;
+  position: relative;
 }
 
 .track-info {
@@ -65,200 +101,4 @@ body {
 .load-more button{
   width:100%;
   height:100%;
-}
-
-/* AudioJS override */
-
-.audiojs{
-  margin: 8px 0px 0px;
-  background: none;
-  background-image: none;
-  box-shadow: none;
-  width: auto;
-}
-
-.audiojs .play-pause{
-  border-right: 1px solid #5E5E5E;
-  padding: 4px 0px;
-  width: 28px;
-}
-
-.audiojs .time{
-  border-left: 1px solid #5E5E5E;
-  padding: 0px 12px;
-}
-
-.audiojs .scrubber{
-  width: 122px;
-}
-
-/* Bootstrap override */
-
-.navbar-default {
-  border-color: transparent;
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #444), color-stop(0.5, #555), color-stop(0.51, #444), color-stop(1, #444));
-  -webkit-box-shadow: 0 4px 20px 1px #000000;
-  box-shadow: 0 4px 20px 1px #000000;
-}
-.navbar-default .navbar-brand {
-  color: #ecf0f1;
-}
-.navbar-default .navbar-brand:hover, .navbar-default .navbar-brand:focus {
-  color: #ecdbff;
-}
-.navbar-default .navbar-text {
-  color: #ecf0f1;
-}
-.navbar-default .navbar-nav > li > a {
-  color: #ecf0f1;
-}
-.navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
-  color: #ecdbff;
-}
-.navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus {
-  color: #ecdbff;
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #444), color-stop(0.5, #555), color-stop(0.51, #444), color-stop(1, #444));
-}
-.navbar-default .navbar-nav > .open > a, .navbar-default .navbar-nav > .open > a:hover, .navbar-default .navbar-nav > .open > a:focus {
-  color: #ecdbff;
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #444), color-stop(0.5, #555), color-stop(0.51, #444), color-stop(1, #444));
-}
-.navbar-default .navbar-toggle:hover, .navbar-default .navbar-toggle:focus {
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #444), color-stop(0.5, #555), color-stop(0.51, #444), color-stop(1, #444));
-}
-.navbar-default .navbar-toggle .icon-bar {
-  background-color: #ecf0f1;
-}
-.navbar-default .navbar-collapse,
-.navbar-default .navbar-form {
-  border-color: #ecf0f1;
-}
-.navbar-default .navbar-link {
-  color: #ecf0f1;
-}
-.navbar-default .navbar-link:hover {
-  color: #ecdbff;
-}
-
-@media (max-width: 767px) {
-  .navbar-default .navbar-nav .open .dropdown-menu > li > a {
-    color: #ecf0f1;
-  }
-  .navbar-default .navbar-nav .open .dropdown-menu > li > a:hover, .navbar-default .navbar-nav .open .dropdown-menu > li > a:focus {
-    color: #ecdbff;
-  }
-  .navbar-default .navbar-nav .open .dropdown-menu > .active > a, .navbar-default .navbar-nav .open .dropdown-menu > .active > a:hover, .navbar-default .navbar-nav .open .dropdown-menu > .active > a:focus {
-    color: #ecdbff;
-    background-color: #8e44ad;
-  }
-}
-
-
-
-.circle {
-    background-color: rgba(0,0,0,0);
-    border: 5px solid rgba(0,183,229,0.9);
-    opacity: .9;
-    border-right: 5px solid rgba(0,0,0,0);
-    border-left: 5px solid rgba(0,0,0,0);
-    border-radius: 50px;
-    box-shadow: 0 0 35px #2187e7;
-    width: 50px;
-    height: 50px;
-    margin: 0 auto;
-    -moz-animation: spinPulse 1s infinite ease-in-out;
-    -webkit-animation: spinPulse 1s infinite linear;
-}
-
-.circle1 {
-    background-color: rgba(0,0,0,0);
-    border: 5px solid rgba(0,183,229,0.9);
-    opacity: .9;
-    border-left: 5px solid rgba(0,0,0,0);
-    border-right: 5px solid rgba(0,0,0,0);
-    border-radius: 50px;
-    box-shadow: 0 0 15px #2187e7;
-    width: 30px;
-    height: 30px;
-    margin: 0 auto;
-    position: relative;
-    top: -40px;
-    -moz-animation: spinoffPulse 1s infinite linear;
-    -webkit-animation: spinoffPulse 1s infinite linear;
-}
-
-@-moz-keyframes spinPulse {
-    0% {
-        -moz-transform: rotate(160deg);
-        opacity: 0;
-        box-shadow: 0 0 1px #2187e7;
-    }
-
-    50% {
-        -moz-transform: rotate(145deg);
-        opacity: 1;
-    }
-
-    100% {
-        -moz-transform: rotate(-320deg);
-        opacity: 0;
-    };
-}
-
-@-moz-keyframes spinoffPulse {
-    0% {
-        -moz-transform: rotate(0deg);
-    }
-
-    100% {
-        -moz-transform: rotate(360deg);
-    };
-}
-
-@-webkit-keyframes spinPulse {
-    0% {
-        -webkit-transform: rotate(160deg);
-        opacity: 0;
-        box-shadow: 0 0 1px #2187e7;
-    }
-
-    50% {
-        -webkit-transform: rotate(145deg);
-        opacity: 1;
-    }
-
-    100% {
-        -webkit-transform: rotate(-320deg);
-        opacity: 0;
-    };
-}
-
-@-webkit-keyframes spinoffPulse {
-    0% {
-        -webkit-transform: rotate(0deg);
-    }
-
-    100% {
-        -webkit-transform: rotate(360deg);
-    };
-}
-
-.spinner-overlay {
-  display:none;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  z-index:1031;
-}
-
-.spinner{
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  margin-left: -25px;
-  margin-top: -25px;
-  width: 50px;
-  height: 50px;
-  z-index: 1032;
 }
