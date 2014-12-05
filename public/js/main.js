@@ -3,6 +3,7 @@ var audio;
 var genres;
 var current_genre;
 var tracks = [];
+var total_tracks = 0;
 
 $(function() {
 	// Dom ready call
@@ -12,6 +13,7 @@ $(function() {
 });
 
 function fetchGenres(){
+  // Fetches genres from sinatra and appends them to the dropdown-menu
   $.get( "/genres", function( data ) {
     genres = data;
     $.each(data, function(key, genre){
@@ -24,23 +26,28 @@ function fetchGenres(){
 }
 
 function setBindings(){
+  // Bindings for ajax calls
   $( document )
   .bind("ajaxSend", showSpinner)
   .bind("ajaxComplete", onAjaxComplete)
   .bind("ajaxStop", hideSpinner)
   .bind("ajaxError", hideSpinner);
 
-	// Sets bindings for tracks
+	// Binding for tracks
   $( document ).on( "click", "#tracks-container a", function (e){
     e.preventDefault();
     playTrack($(this));
   })
+
+  // Binding for the dropdown-menu
   $( document ).on( "click", ".dropdown-menu li a", function(e){
     e.preventDefault();
     toggleDropdownText($(this).text());
     clearTracks();
     fetchTracks($(this).text(), 0);
   });
+
+
   $( document ).on( "click", ".load-more button", function(e){
     offset = Object.keys(tracks).length;
     fetchTracks(current_genre, offset);
@@ -48,7 +55,7 @@ function setBindings(){
 }
 
 function fetchTracks(genre, offset) {
-  // Fetches tracks from the backend
+  // Fetches tracks from the backend and appends them to the app
   var limit = calculateTotalTracks() + offset;
   $.get( "/tracks/"+genre+"/"+offset+"/"+limit, function( data ) {
     tracks = $.extend({},tracks,data);
@@ -73,6 +80,7 @@ function fetchTracks(genre, offset) {
 }
 
 function playTrack(track_case){
+  // Plays the track based on the jquery object
   $("#tracks-container img").removeClass('playing_track');
   var track = tracks[track_case.attr('track-id')];
   $('.track-info .title').html(track.title);
@@ -84,41 +92,57 @@ function playTrack(track_case){
 }
 
 function playFirstTrack(){
+  // Play first track on the list
   var track_case = $("#tracks-container a").first();
   playTrack(track_case);
 }
 
 function calculateTotalTracks(){
 	// Returns amount of tracks that fits in the screen
-	// Taking into account player's size and scrollbar's as well.
-	var tracks_height = Math.ceil(($(document).height() - 60) / 160);
-	var tracks_width = Math.floor(($('body').innerWidth() - 20) / 160);
+	if(!total_tracks){
+    // index offset -1
+    var substract = 1;
+    // Taking into account player's size and scrollbar's as well.
+    var tracks_height = Math.ceil(($(document).height() - 60) / 160);
+    var tracks_width = Math.floor(($('body').innerWidth() - 20) / 160);
 
-  // If load-more button exists then fetch more tracks
-  var substract = 2 - $(".load-more").length;
-	return (tracks_height * tracks_width) - substract;
+    total_tracks = (tracks_height * tracks_width) - substract;
+
+    // First load implies one track less due to the load-more button
+    alert(total_tracks);
+    return total_tracks -1;
+  }
+
+  alert(total_tracks);
+  return total_tracks;
 }
 
 function clearTracks(){
+  // Clear tracks from the app
   tracks = [];
   $('#tracks-container').html('');
 }
 
 function toggleDropdownText(text){
+  // Change dropdown text based on selection
   current_genre = text;
   $(".dropdown-toggle:first-child").html(text+' <span class="caret"></span>');
 }
 
 function setAudio(){
+  // Creates AudioJS object
   as = $('audio');
   audio = audiojs.create(as)[0];
 }
 
 function addLoadMore(){
+  // Removes and ads a load-more button
   $('.load-more').remove()
   $('<div/>', {
     class: 'load-more',
-    html: "<button type='button' class='btn btn-default btn-lg'><span class='glyphicon glyphicon-refresh' aria-hidden='true'></span> Load More</button>"
+    html: "<button type='button' class='btn btn-default btn-lg'> \
+            <span class='glyphicon glyphicon-refresh' aria-hidden='true'></span> Load More \
+           </button>"
   }).appendTo('#tracks-container');
 }
 
