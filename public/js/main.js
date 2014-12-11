@@ -4,9 +4,11 @@ var genres;
 var current_genre;
 var tracks = [];
 var total_tracks = 0;
+var tracks_width_px = 0;
 
 $(function() {
 	// Dom ready call
+  setCustomCss();
   setAudio();
 	setBindings();
   fetchGenres();
@@ -56,7 +58,7 @@ function setBindings(){
 
 function fetchTracks(genre, offset) {
   // Fetches tracks from the backend and appends them to the app
-  var limit = calculateTotalTracks() + offset;
+  var limit = getTotalTracks() + offset;
   $.get( "/tracks/"+genre+"/"+offset+"/"+limit, function( data ) {
     tracks = $.extend({},tracks,data);
     $.each(data, function(key, track){
@@ -98,19 +100,12 @@ function playFirstTrack(){
 }
 
 function calculateTotalTracks(){
-	// Returns amount of tracks that fits in the screen
-	if(!total_tracks){
-    // index offset -1
-    var substract = 1;
-    // Taking into account player's size and scrollbar's as well.
-    var tracks_height = Math.ceil(($(document).height() - 60) / 160);
-    var tracks_width = Math.floor(($('body').innerWidth() - 20) / 160);
-
-    total_tracks = (tracks_height * tracks_width) - substract;
-
-    // First load implies one track less due to the load-more button
-    return total_tracks -1;
-  }
+  // index offset -1 & first load implies one track less due to the load-more button
+  var substract = 2;
+  // Taking into account player's size and scrollbar's as well.
+  var tracks_height = getTracksHeight();
+  var tracks_width = getTracksWidth();
+  total_tracks = (tracks_height * tracks_width) - substract;
 
   return total_tracks;
 }
@@ -153,6 +148,26 @@ function onProgress( imgLoad, image ) {
   if ( !image.isLoaded ) {
     $item.addClass('is-broken');
   }
+}
+
+function setCustomCss(){
+  $('#tracks-container').css('width' ,getTracksWidth() * 160);
+}
+
+function getTotalTracks(){
+  // Returns amount of tracks that fits in the screen
+  if(!total_tracks){
+    return calculateTotalTracks();
+  }
+  return total_tracks;
+}
+
+function getTracksWidth(){
+  return Math.floor(($('body').innerWidth() - 20) / 160);
+}
+
+function getTracksHeight(){
+  return Math.ceil(($(document).height() - 60) / 160);
 }
 
 function onAjaxComplete(){
