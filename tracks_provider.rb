@@ -13,14 +13,17 @@ class TracksProvider
 	def initialize
 		@dc = Dalli::Client.new
 		@genres = YAML.load_file('config/genres.yaml')
+		@default_genre_imgs = {}
 	end
 
 	def update
 		client = get_api_connector
 		tracks = []
 
+		fetch_default_genre_images
+
 		@genres.each do |genre|
-			genre_tracks = fetch_tracks_api(genre,client) + fetch_tracks_web(genre)
+			genre_tracks = fetch_tracks_api(genre,client) #+ fetch_tracks_web(genre)
 			genre_tracks.map do |track|
 				track['genre'] = genre
 				track
@@ -104,16 +107,23 @@ class TracksProvider
 	end
 
 	def img_track track
-		img = track['artwork_url'].to_s
-		if img.empty?
-			img = "public/img/" + track['genre'] + ".jpg"
-			if File.exists?(img)
-				img.slice! "public/"
-			else
-				img = ''
-			end
+		soundcloud_img = track['artwork_url'].to_s
+		if soundcloud_img.empty?
+			@default_genre_imgs[track['genre']] || ''
+		else
+			soundcloud_img
 		end
-		img
+	end
+
+	def fetch_default_genre_images
+		images_paths = Dir["public/img/*.jpg"]
+		images_paths.each do |img|
+			# strip top level dir
+			img.slice! 'public/'
+			genre_name = File.basename(img, '.jpg')
+			@default_genre_imgs[genre_name] = img
+		end
+		@default_genre_imgs
 	end
 
 	def get_api_connector
