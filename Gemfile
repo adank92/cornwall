@@ -7,3 +7,7 @@ gem 'haml'
 gem 'json'
 gem 'dalli'
 gem 'whenever'
+
+group :development do
+  gem 'rubocop'
+end

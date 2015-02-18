@@ -1,7 +1,7 @@
 require './tracks_provider'
 
-task :default => :update_tracks
+task default: :update_tracks
 
 task :update_tracks do
-	TracksProvider.new.update
+  TracksProvider.new.update
 end
