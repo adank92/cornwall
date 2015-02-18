@@ -13,35 +13,39 @@ class TracksProvider
   def initialize
     @dc = Dalli::Client.new
     @genres = YAML.load_file('config/genres.yaml')
-    @default_genre_imgs = {}
   end
 
   def update
-    client = api_connector
-    tracks = []
+    tracks = fetch_tracks
+    persist_tracks tracks
+    sanitize_tracks tracks
+    tracks
+  end
 
-    fetch_default_genre_images
-
-    @genres.each do |genre|
-      genre_tracks = fetch_tracks_api(genre, client) #+ fetch_tracks_web(genre)
-      genre_tracks.map do |track|
-        track['genre'] = genre
-        track
-      end
-      tracks.concat genre_tracks
-    end
-
-    tracks.uniq! { |t| t['uri'].split('/').last }
-    tracks.map! { |track| track_summary(track) }
-    tracks.sort_by! { |t| -t[:freshness] }
-
+  def persist_tracks(tracks)
     @genres.each do |genre|
       genre_tracks = tracks.select { |track| track[:genre] == genre }
       genre.downcase!
       @dc.set(genre, genre_tracks)
     end
+  end
 
-    tracks
+  def fetch_tracks(client = api_connector)
+    @genres.inject([]) do |acc, genre|
+      genre_tracks = fetch_tracks_api(genre, client)
+                     .map do |t|
+                       t['genre'] = genre
+                       t
+                     end
+      acc.concat genre_tracks
+    end
+  end
+
+  def sanitize_tracks(tracks)
+    genre_default_images = fetch_default_genre_images
+    tracks.uniq { |t| t['uri'].split('/').last }
+      .map { |t| track_summary(t, genre_default_images[t['genre']]) }
+      .sort_by { |t| -t[:freshness] }
   end
 
   def fetch_tracks_api(genre, client = nil)
@@ -89,7 +93,7 @@ class TracksProvider
     tracks_total
   end
 
-  def track_summary(track)
+  def track_summary(track, default_image)
     {
       artist: track['user']['username'],
       title: track['title'],
@@ -97,7 +101,7 @@ class TracksProvider
       id: track['id'],
       genre: track['genre'],
       permalink: track['permalink_url'],
-      artwork: img_track(track),
+      artwork: img_track(track, default_image),
       freshness: freshness(track)
     }
   end
@@ -110,24 +114,22 @@ class TracksProvider
     plays / days.to_f**1.2
   end
 
-  def img_track(track)
-    soundcloud_img = track['artwork_url'].to_s
-    if soundcloud_img.empty?
-      @default_genre_imgs[track['genre']] || ''
-    else
-      soundcloud_img
-    end
+  def img_track(track, default_image)
+    track_image = track['artwork_url'].to_s
+    track_image = default_image if track_image.empty?
+    track_image || ''
   end
 
   def fetch_default_genre_images
+    default_genre_imgs = {}
     images_paths = Dir['public/img/*.jpg']
     images_paths.each do |img|
       # strip top level dir
       img.slice! 'public/'
       genre_name = File.basename(img, '.jpg')
-      @default_genre_imgs[genre_name] = img
+      default_genre_imgs[genre_name] = img
     end
-    @default_genre_imgs
+    default_genre_imgs
   end
 
   def api_connector
