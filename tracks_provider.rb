@@ -48,24 +48,15 @@ class TracksProvider
       .sort_by { |t| -t[:freshness] }
   end
 
-  def fetch_tracks_api(genre, client = nil)
-    client ||= api_connector
+  def fetch_tracks_api(genre, client = api_connector)
     stream_urls = []
-    params = {
-      :genres => genre,
-      :limit => PAGE_SIZE,
-      :licence => LICENSE,
-      :"duration[from]" => 150_000,
-      :"duration[to]" => 480_000
-    }
+    params = params_api(genre)
 
     PAGE_COUNT.times do |page|
       puts "Fetching from API. Genre #{genre}, Page #{page}"
       params[:offset] = PAGE_SIZE * page
       tracks = client.get('/tracks', params)
-      tracks.each do |track|
-        stream_urls << track if track.streamable
-      end
+      tracks.each { |track| stream_urls << track if track.streamable }
     end
 
     puts "Returning total: #{stream_urls.count}"
@@ -130,6 +121,16 @@ class TracksProvider
       default_genre_imgs[genre_name] = img
     end
     default_genre_imgs
+  end
+
+  def params_api
+    {
+      genres: genre,
+      limit: PAGE_SIZE,
+      licence: LICENSE,
+      :"duration[from]" => 150_000,
+      :"duration[to]" => 480_000
+    }
   end
 
   def api_connector
