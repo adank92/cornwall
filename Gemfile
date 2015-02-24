@@ -5,7 +5,7 @@ gem 'sinatra'
 gem 'pry'
 gem 'haml'
 gem 'json'
-gem 'dalli'
+gem 'redis'
 gem 'whenever'
 
 group :development do

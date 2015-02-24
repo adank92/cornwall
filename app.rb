@@ -1,6 +1,6 @@
 require 'sinatra'
 require 'json'
-require 'dalli'
+require 'redis'
 require 'yaml'
 
 get '/' do
@@ -12,7 +12,8 @@ get '/tracks/:genre/:offset/:limit' do
   genre = params[:genre].downcase
   offset = params[:offset].to_i
   limit = params[:limit].to_i
-  JSON.generate(tracks_fetch(genre, offset, limit))
+  tracks = tracks_fetch(genre, offset, limit)
+  JSON.generate(tracks)
 end
 
 get '/genres' do
@@ -23,9 +24,10 @@ get '/genres' do
 end
 
 def tracks_fetch(genre, offset, limit)
-  # Memcached communication
-  dc = Dalli::Client.new
-  tracks = dc.get(genre) || []
+  # Redis communication
+  rd = Redis.new
+  return [] unless tracks = rd.get(genre)
+  tracks = JSON.parse(tracks, symbolize_names: true)
   tracks = tracks[offset..limit]
   Hash[tracks.map { |track| [track[:id], track] }]
 end

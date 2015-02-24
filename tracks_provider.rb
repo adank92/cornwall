@@ -1,7 +1,7 @@
 require 'soundcloud'
 require 'json'
 require 'open-uri'
-require 'dalli'
+require 'redis'
 require 'yaml'
 
 class TracksProvider
@@ -11,14 +11,13 @@ class TracksProvider
   LICENSE = 'cc-by-sa'
 
   def initialize
-    @dc = Dalli::Client.new
+    @rc = Redis.new
     @genres = YAML.load_file('config/genres.yaml')
   end
 
   def update
-    tracks = fetch_tracks
+    tracks = sanitize_tracks fetch_tracks
     persist_tracks tracks
-    sanitize_tracks tracks
     tracks
   end
 
@@ -26,7 +25,7 @@ class TracksProvider
     @genres.each do |genre|
       genre_tracks = tracks.select { |track| track[:genre] == genre }
       genre.downcase!
-      @dc.set(genre, genre_tracks)
+      @rc.set(genre, genre_tracks.to_json)
     end
   end
 
