@@ -123,7 +123,7 @@ class TracksProvider
     default_genre_imgs
   end
 
-  def params_api
+  def params_api(genre)
     {
       genres: genre,
       limit: PAGE_SIZE,
