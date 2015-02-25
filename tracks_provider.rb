@@ -11,9 +11,19 @@ class TracksProvider
   end
 
   def update
-    tracks = sanitize_tracks fetch_tracks
+    tracks = sanitize_tracks(fetch_tracks)
     persist_tracks tracks
     tracks
+  end
+
+  def sanitize_tracks(tracks)
+    default_images = fetch_default_genre_images
+    tracks.uniq! { |t| t['uri'].split('/').last }
+    tracks.map! do |t|
+      genre = t['genre'].downcase
+      track_summary(t, default_images[genre])
+    end
+    tracks.sort_by { |t| -t[:freshness] }
   end
 
   def persist_tracks(tracks)
@@ -27,19 +37,8 @@ class TracksProvider
   def fetch_tracks(client = api_connector)
     @config['genres'].inject([]) do |acc, genre|
       genre_tracks = fetch_tracks_api(genre, client)
-                     .map do |t|
-                       t['genre'] = genre
-                       t
-                     end
       acc.concat genre_tracks
     end
-  end
-
-  def sanitize_tracks(tracks)
-    genre_default_images = fetch_default_genre_images
-    tracks.uniq { |t| t['uri'].split('/').last }
-      .map { |t| track_summary(t, genre_default_images[t['genre']]) }
-      .sort_by { |t| -t[:freshness] }
   end
 
   def fetch_tracks_api(genre, client = api_connector)
@@ -78,31 +77,12 @@ class TracksProvider
     tracks_total
   end
 
-  def track_summary(track, default_image)
-    {
-      artist: track['user']['username'],
-      title: track['title'],
-      mp3: track['stream_url'] + "?client_id=#{@config['client_id']}",
-      id: track['id'],
-      genre: track['genre'],
-      permalink: track['permalink_url'],
-      artwork: img_track(track, default_image),
-      freshness: freshness(track)
-    }
-  end
-
   def freshness(track)
     days = Date.today - Date.parse(track['created_at'])
     days = 1 if days < 1
     plays = track['playback_count'].to_i
     plays = 1 if plays < 1
     plays / days.to_f**1.2
-  end
-
-  def img_track(track, default_image)
-    track_image = track['artwork_url'].to_s
-    track_image = default_image if track_image.empty?
-    track_image || ''
   end
 
   def fetch_default_genre_images
@@ -117,6 +97,19 @@ class TracksProvider
     default_genre_imgs
   end
 
+  def track_summary(track, default_image)
+    {
+      artist: track['user']['username'],
+      title: track['title'],
+      mp3: "#{track['stream_url']}?client_id=#{@config['client_id']}",
+      id: track['id'],
+      genre: track['genre'].downcase,
+      permalink: track['permalink_url'],
+      artwork: img_track(track, default_image),
+      freshness: freshness(track)
+    }
+  end
+
   def params_api(genre)
     {
       genres: genre,
@@ -125,6 +118,12 @@ class TracksProvider
       :"duration[from]" => 150_000,
       :"duration[to]" => 480_000
     }
+  end
+
+  def img_track(track, default_image)
+    track_image = track['artwork_url'].to_s
+    track_image = default_image if track_image.empty?
+    track_image || ''
   end
 
   def api_connector
