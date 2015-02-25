@@ -5,14 +5,9 @@ require 'redis'
 require 'yaml'
 
 class TracksProvider
-  CLIENT_ID = 'a2340d5b7b5f7e58128486190268ce71'
-  PAGE_SIZE = 200
-  PAGE_COUNT = 2
-  LICENSE = 'cc-by-sa'
-
   def initialize
     @rc = Redis.new
-    @genres = YAML.load_file('config/genres.yaml')
+    @config = YAML.load_file('config/config.yaml')
   end
 
   def update
@@ -22,7 +17,7 @@ class TracksProvider
   end
 
   def persist_tracks(tracks)
-    @genres.each do |genre|
+    @config['genres'].each do |genre|
       genre_tracks = tracks.select { |track| track[:genre] == genre }
       genre.downcase!
       @rc.set(genre, genre_tracks.to_json)
@@ -30,7 +25,7 @@ class TracksProvider
   end
 
   def fetch_tracks(client = api_connector)
-    @genres.inject([]) do |acc, genre|
+    @config['genres'].inject([]) do |acc, genre|
       genre_tracks = fetch_tracks_api(genre, client)
                      .map do |t|
                        t['genre'] = genre
@@ -51,9 +46,9 @@ class TracksProvider
     stream_urls = []
     params = params_api(genre)
 
-    PAGE_COUNT.times do |page|
+    @config['page_count'].times do |page|
       puts "Fetching from API. Genre #{genre}, Page #{page}"
-      params[:offset] = PAGE_SIZE * page
+      params[:offset] = @config['page_size'] * page
       tracks = client.get('/tracks', params)
       tracks.each { |track| stream_urls << track if track.streamable }
     end
@@ -64,12 +59,12 @@ class TracksProvider
 
   def fetch_tracks_web(genre)
     tracks_total = []
-    PAGE_COUNT.times do |page|
+    @config['page_count'].times do |page|
       puts "Fetching from WEB. Genre #{genre}, Page #{page}"
-      offset = PAGE_SIZE * page
+      offset = @config['page_size'] * page
       url = "https://api-v2.soundcloud.com/explore/
       #{genre}?tag=uniform-time-decay-experiment%3A1%3A1389973574
-      &limit=#{PAGE_SIZE}
+      &limit=#{@config['page_size']}
       &offset=#{offset}
       &linked_partitioning=1"
       begin
@@ -87,7 +82,7 @@ class TracksProvider
     {
       artist: track['user']['username'],
       title: track['title'],
-      mp3: track['stream_url'] + "?client_id=#{CLIENT_ID}",
+      mp3: track['stream_url'] + "?client_id=#{@config['client_id']}",
       id: track['id'],
       genre: track['genre'],
       permalink: track['permalink_url'],
@@ -125,14 +120,14 @@ class TracksProvider
   def params_api(genre)
     {
       genres: genre,
-      limit: PAGE_SIZE,
-      licence: LICENSE,
+      limit: @config['page_size'],
+      licence: @config['license'],
       :"duration[from]" => 150_000,
       :"duration[to]" => 480_000
     }
   end
 
   def api_connector
-    Soundcloud.new(client_id: CLIENT_ID)
+    Soundcloud.new(client_id: @config['client_id'])
   end
 end

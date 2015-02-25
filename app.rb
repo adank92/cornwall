@@ -18,7 +18,7 @@ end
 
 get '/genres' do
   # Returns available genres
-  genres = YAML.load_file('config/genres.yaml')
+  genres = YAML.load_file('config/config.yaml')['genres']
   genres.map!(&:capitalize)
   JSON.generate(genres)
 end
