@@ -26,8 +26,8 @@ end
 def tracks_fetch(genre, offset, limit)
   # Redis communication
   rd = Redis.new
-  return [] unless tracks = rd.get(genre)
-  tracks = JSON.parse(tracks, symbolize_names: true)
-  tracks = tracks[offset..limit]
+  tracks = rd.get(genre)
+  return [] unless tracks
+  tracks = JSON.parse(tracks, symbolize_names: true)[offset..limit]
   Hash[tracks.map { |track| [track[:id], track] }]
 end
